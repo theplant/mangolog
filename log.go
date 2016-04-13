@@ -1,9 +1,11 @@
 package mangolog
 
 import (
-	. "github.com/paulbellamy/mango"
 	"log"
 	"time"
+
+	. "github.com/paulbellamy/mango"
+	"github.com/theplant/qortex/models/members"
 )
 
 // Started GET "/look/women" for 111.86.201.25 at Sun Apr 22 11:21:28 +0000 2012
@@ -30,6 +32,13 @@ func MakeangLogger(debug bool) Middleware {
 		}
 
 		status, headers, body = app(env)
+
+		member, _ := env["LOGGED_IN_MEMBER_KEY"].(*members.Member)
+		if member != nil {
+			execution := time.Now().Sub(startTime) / time.Millisecond
+			log.Printf("%s Completed \"%s\" %d in %dms\n\n", member.Name()+" "+member.Id.Hex(), r.RequestURI, status, execution)
+			return
+		}
 
 		execution := time.Now().Sub(startTime) / time.Millisecond
 		log.Printf("Completed \"%s\" %d in %dms\n\n", r.RequestURI, status, execution)
